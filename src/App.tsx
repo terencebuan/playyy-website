@@ -320,7 +320,7 @@ export default function PlayyyCoinSellerWebsite() {
     },
   ];
 
-  const [amount, setAmount] = useState(300);
+  const [amount, setAmount] = useState("100");
   const [reviews, setReviews] = useState(initialReviews);
   const [buyerName, setBuyerName] = useState("");
   const [buyerComment, setBuyerComment] = useState("");
@@ -333,7 +333,7 @@ export default function PlayyyCoinSellerWebsite() {
   };
 
   const calculator = useMemo(() => {
-    const cleanAmount = Number.isFinite(amount) ? amount : 0;
+    const cleanAmount = Number(amount);
     const safeAmount = Math.min(50000, Math.max(100, cleanAmount || 100));
     const bonusRate = getBonusRate(safeAmount);
     const baseCoins = safeAmount;
@@ -635,18 +635,24 @@ export default function PlayyyCoinSellerWebsite() {
                 </p>
 
                 <input
-                  type="number"
-                  min={100}
-                  max={50000}
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   value={amount}
+                  onFocus={(e) => e.target.select()}
+                  onBlur={() => {
+                    if (amount.trim() === "") {
+                      setAmount("300");
+                    }
+                  }}
                   onChange={(e) => {
-                    let value = e.target.value;
+                    let value = e.target.value.replace(/\D/g, "");
 
-                    if (value.length > 1 && value.startsWith("0")) {
+                    if (value.length > 1) {
                       value = value.replace(/^0+/, "");
                     }
 
-                    setAmount(Number(value || 0));
+                    setAmount(value);
                   }}
                   className="mt-5 w-full rounded-2xl border border-[#d6b36a]/15 px-4 py-4 text-2xl font-bold bg-[#1a1712] outline-none focus:border-[#d6b36a]/35"
                 />
