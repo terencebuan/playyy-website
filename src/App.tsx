@@ -451,8 +451,13 @@ export default function PlayyyCoinSellerWebsite() {
         <header className="sticky top-0 z-30 border-b border-[#d6b36a]/10 backdrop-blur-md bg-[#0b0a08]/78">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
             <div>
-              <div className="text-base sm:text-xl md:text-2xl font-black tracking-[0.12em] sm:tracking-[0.18em] uppercase leading-5">
-                𝐏 𝐋 𝐀 𝐘 𝐘 𝐘 💯 <span className="text-[#d6b36a]">Coin Seller</span>
+              <div className="uppercase leading-none">
+                <div className="text-[17px] sm:text-xl md:text-2xl font-black tracking-[0.22em] sm:tracking-[0.28em] text-white whitespace-nowrap">
+                  𝐏 𝐋 𝐀 𝐘 𝐘 𝐘 💯
+                </div>
+                <div className="mt-1 text-[15px] sm:text-lg md:text-xl font-black tracking-[0.18em] sm:tracking-[0.24em] text-[#d6b36a] whitespace-nowrap">
+                  COIN SELLER
+                </div>
               </div>
               <div className="text-[10px] sm:text-xs text-[#c5b89d] tracking-[0.12em] sm:tracking-[0.18em] uppercase leading-4">
                 StarMaker recharge coins top ups
@@ -693,43 +698,46 @@ export default function PlayyyCoinSellerWebsite() {
           </SimpleCard>
         </section>
 
-        <section id="packages" className="max-w-7xl mx-auto px-6 py-10">
-          <div className="mb-6">
-            <div className="text-sm uppercase tracking-[0.2em] text-[#d6b36a]">
-              Compare value
+        <section id="packages" className="max-w-7xl mx-auto px-4 sm:px-6 py-7 sm:py-10">
+          <div className="mb-4 sm:mb-6">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#d6b36a]/18 bg-[#17130f] px-3 py-1.5 text-[10px] sm:text-sm uppercase tracking-[0.18em] sm:tracking-[0.2em] text-[#d6b36a]">
+              <BadgeDollarSign size={13} /> Compare value
             </div>
-            <h3 className="text-3xl font-black mt-2">In APP vs your DEAL</h3>
+            <h3 className="mt-2 text-[28px] sm:text-3xl md:text-4xl font-black leading-tight">
+              In App vs
+              <span className="block bg-gradient-to-r from-white via-yellow-100 to-[#d6b36a] bg-clip-text text-transparent">Your Deal</span>
+            </h3>
 
-            <div className="mt-5 rounded-[26px] border border-[#d6b36a]/18 bg-[linear-gradient(180deg,rgba(39,29,18,0.98),rgba(24,18,12,0.96))] p-5 shadow-[0_12px_26px_rgba(214,179,106,0.05)]">
-              <div className="flex items-start gap-4">
-                <div className="mt-1 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-[#d6b36a]/18 bg-[#1c1710] text-[#d6b36a]">
-                  <BadgeDollarSign size={20} />
+            <div className="mt-4 rounded-[22px] sm:rounded-[26px] border border-[#d6b36a]/18 bg-[linear-gradient(180deg,rgba(39,29,18,0.98),rgba(24,18,12,0.96))] p-4 sm:p-5 shadow-[0_12px_26px_rgba(214,179,106,0.05)]">
+              <div className="flex items-start gap-3 sm:gap-4">
+                <div className="mt-0.5 flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-2xl border border-[#d6b36a]/18 bg-[#1c1710] text-[#d6b36a]">
+                  <BadgeDollarSign size={18} />
                 </div>
 
                 <div>
-                  <div className="text-xl md:text-2xl font-black text-[#fff0c3] leading-tight">
-                    Posted rates apply to cash payment only.
+                  <div className="text-base sm:text-xl md:text-2xl font-black text-[#fff0c3] leading-tight">
+                    Cash payment rates only.
                   </div>
-                  <div className="mt-2 text-base md:text-lg font-medium text-[#eadfcb] leading-8">
-                    Other arrangements are subject to separate terms.
+                  <div className="mt-1.5 text-xs sm:text-base md:text-lg font-medium text-[#eadfcb] leading-5 sm:leading-7">
+                    Other arrangements may have separate terms. Please wait for confirmation before paying.
                   </div>
                 </div>
               </div>
             </div>
 
-            <p className="mt-4 text-sm text-[#d6b36a]">
+            <p className="mt-3 rounded-2xl border border-[#d6b36a]/14 bg-[#15110d] px-3 py-2 text-[12px] sm:text-sm leading-5 text-[#d6b36a]">
               ₱100 to ₱299 = 35% bonus • ₱300 to ₱50,000 = 36% bonus
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-5">
+          <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-5">
             {packages.map((item) => {
               const bonusRate = getBonusRate(item.php);
               const yourCoins = Math.round(item.php * (1 + bonusRate));
 
               return (
-                <SimpleCard key={item.php} className="p-6 h-full" highlight={item.php === 1000}>
-                  <div className="flex items-center justify-between mb-2">
+                <SimpleCard key={item.php} className="p-4 sm:p-6 h-full" highlight={item.php === 1000}>
+                  <div className="flex items-center justify-between gap-3 mb-2">
                     <div className="text-xs uppercase tracking-[0.14em] text-[#a99d89]">
                       In app
                     </div>
@@ -747,8 +755,8 @@ export default function PlayyyCoinSellerWebsite() {
                     </div>
 
                     <div className="text-right">
-                      <div className="text-3xl font-black">{formatPHP(item.php)}</div>
-                      <div className="text-xl text-[#e6d2a0] font-bold">
+                      <div className="text-2xl sm:text-3xl font-black">{formatPHP(item.php)}</div>
+                      <div className="text-lg sm:text-xl text-[#e6d2a0] font-bold">
                         {formatCoins(yourCoins)} coins
                       </div>
                       <div className="mt-1 text-xs uppercase tracking-[0.14em] text-[#d6b36a]">
@@ -758,7 +766,7 @@ export default function PlayyyCoinSellerWebsite() {
                   </div>
 
                   <div className="mt-4 flex items-center justify-between gap-3">
-                    <div className="text-xs text-[#b9ae9a]">{item.note}</div>
+                    <div className="text-[11px] sm:text-xs leading-4 text-[#b9ae9a]">{item.note}</div>
                     {(item.php === 1000 || item.php === 5000) && (
                       <div className="inline-flex items-center gap-1 rounded-full border border-[#d6b36a]/18 bg-[#19140f] px-3 py-1 text-[10px] uppercase tracking-[0.16em] text-[#e8cf94]">
                         <Flame size={12} /> hot
@@ -771,23 +779,23 @@ export default function PlayyyCoinSellerWebsite() {
           </div>
         </section>
 
-        <section className="max-w-7xl mx-auto px-6 py-10">
-          <div className="mb-6 text-center">
-            <div className="text-sm uppercase tracking-[0.2em] text-[#d6b36a]">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
+          <div className="mb-5 sm:mb-6 text-center">
+            <div className="text-[11px] sm:text-sm uppercase tracking-[0.2em] text-[#d6b36a]">
               Premium Value Comparison
             </div>
-            <h3 className="text-3xl md:text-5xl font-black mt-2">
+            <h3 className="text-[28px] sm:text-3xl md:text-5xl font-black mt-2 leading-tight">
               See the{" "}
               <span className="bg-gradient-to-r from-white via-yellow-100 to-[#f6d365] bg-clip-text text-transparent">
                 smarter deal
               </span>
             </h3>
-            <p className="mt-3 text-[#c9bfae] max-w-2xl mx-auto">
-              Compare the usual in app top up with the more premium and buyer-focused experience of ordering directly with me.
+            <p className="mt-3 text-sm sm:text-base leading-6 text-[#c9bfae] max-w-2xl mx-auto">
+              Quick side-by-side view so buyers can understand the value faster on mobile.
             </p>
           </div>
 
-          <div className="grid gap-8 md:grid-cols-2">
+          <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
             <ComparisonCard
               title="In App Top Up"
               badge="Standard"
