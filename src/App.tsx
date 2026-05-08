@@ -639,7 +639,15 @@ export default function PlayyyCoinSellerWebsite() {
                   min={100}
                   max={50000}
                   value={amount}
-                  onChange={(e) => setAmount(Number(e.target.value))}
+                  onChange={(e) => {
+                    let value = e.target.value;
+
+                    if (value.length > 1 && value.startsWith("0")) {
+                      value = value.replace(/^0+/, "");
+                    }
+
+                    setAmount(Number(value || 0));
+                  }}
                   className="mt-5 w-full rounded-2xl border border-[#d6b36a]/15 px-4 py-4 text-2xl font-bold bg-[#1a1712] outline-none focus:border-[#d6b36a]/35"
                 />
               </div>
