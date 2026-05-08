@@ -14,15 +14,6 @@ import {
   CheckCircle2,
   BadgeDollarSign,
 } from "lucide-react";
-import { db } from "./firebase";
-import {
-  collection,
-  addDoc,
-  onSnapshot,
-  query,
-  orderBy,
-  serverTimestamp,
-} from "firebase/firestore";
 
 type ReviewItem = {
   name: string;
@@ -275,7 +266,7 @@ function DocumentVisualCard({
           href={href}
           target="_blank"
           rel="noreferrer"
-          className="group relative inline-flex items-center gap-2 rounded-2xl px-5 py-3 bg-[#d6b36a] text-black font-semibold shadow-[0_6px_16px_rgba(214,179,106,0.12)] hover:scale-[1.02] transition-transform overflow-hidden"
+          className="group relative inline-flex items-center gap-2 rounded-2xl px-4 sm:px-5 py-2.5 sm:py-3 bg-[#d6b36a] text-black text-sm sm:text-base font-semibold shadow-[0_6px_16px_rgba(214,179,106,0.12)] hover:scale-[1.02] transition-transform overflow-hidden"
         >
           View Full Document
           <ArrowRight size={16} />
@@ -330,7 +321,7 @@ export default function PlayyyCoinSellerWebsite() {
   ];
 
   const [amount, setAmount] = useState(300);
-  const [reviews, setReviews] = useState<ReviewItem[]>(initialReviews);
+  const [reviews, setReviews] = useState(initialReviews);
   const [buyerName, setBuyerName] = useState("");
   const [buyerComment, setBuyerComment] = useState("");
   const [copied, setCopied] = useState(false);
@@ -364,39 +355,6 @@ export default function PlayyyCoinSellerWebsite() {
     return () => clearTimeout(timer);
   }, [copied]);
 
-  useEffect(() => {
-    const commentsQuery = query(
-      collection(db, "buyerFeedback"),
-      orderBy("createdAt", "desc")
-    );
-
-    const unsubscribe = onSnapshot(
-      commentsQuery,
-      (snapshot) => {
-        const liveReviews: ReviewItem[] = snapshot.docs.map((doc) => {
-          const data = doc.data();
-
-          return {
-            name: typeof data.name === "string" ? data.name : "Buyer",
-            tag: typeof data.tag === "string" ? data.tag : "REPEAT BUYER",
-            message:
-              typeof data.message === "string"
-                ? data.message
-                : "Smooth transaction.",
-          };
-        });
-
-        setReviews(liveReviews.length > 0 ? liveReviews : initialReviews);
-      },
-      (error) => {
-        console.error("Unable to load live feedback:", error);
-        setReviews(initialReviews);
-      }
-    );
-
-    return () => unsubscribe();
-  }, []);
-
   const formatPHP = (value: number) =>
     new Intl.NumberFormat("en-PH", {
       style: "currency",
@@ -428,7 +386,7 @@ export default function PlayyyCoinSellerWebsite() {
     }
   };
 
-  const submitReview = async () => {
+  const submitReview = () => {
     const name = buyerName.trim();
     const message = buyerComment.trim();
 
@@ -437,20 +395,9 @@ export default function PlayyyCoinSellerWebsite() {
       return;
     }
 
-    try {
-      await addDoc(collection(db, "buyerFeedback"), {
-        name,
-        tag: getCommentTag(message),
-        message,
-        createdAt: serverTimestamp(),
-      });
-
-      setBuyerName("");
-      setBuyerComment("");
-    } catch (error) {
-      console.error("Unable to post feedback:", error);
-      alert("Unable to post feedback. Please try again.");
-    }
+    setReviews((prev) => [{ name, tag: getCommentTag(message), message }, ...prev]);
+    setBuyerName("");
+    setBuyerComment("");
   };
 
   return (
@@ -497,24 +444,24 @@ export default function PlayyyCoinSellerWebsite() {
       <div className="absolute left-1/2 top-0 h-[220px] w-[220px] -translate-x-1/2 rounded-full bg-yellow-300/6 blur-[55px] animate-[glowPulse_12s_ease-in-out_infinite]" />
 
       <div className="relative z-10">
-        <div className="relative overflow-hidden text-center text-[11px] md:text-xs py-2 tracking-[0.22em] uppercase bg-[linear-gradient(90deg,#f9ebb7,#d6b36a,#fff4c8,#c99534,#f9ebb7)] text-black shadow-[0_4px_14px_rgba(214,179,106,0.14)]">
+        <div className="relative overflow-hidden text-center text-[8.5px] sm:text-[10px] md:text-xs py-1.5 sm:py-2 px-3 tracking-[0.12em] sm:tracking-[0.22em] uppercase bg-[linear-gradient(90deg,#f9ebb7,#d6b36a,#fff4c8,#c99534,#f9ebb7)] text-black shadow-[0_4px_14px_rgba(214,179,106,0.14)] leading-4">
           High demand today • Priority for repeat buyers • Limited daily slots
         </div>
 
         <header className="sticky top-0 z-30 border-b border-[#d6b36a]/10 backdrop-blur-md bg-[#0b0a08]/78">
-          <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
             <div>
-              <div className="text-xl md:text-2xl font-black tracking-[0.18em] uppercase">
+              <div className="text-base sm:text-xl md:text-2xl font-black tracking-[0.12em] sm:tracking-[0.18em] uppercase leading-5">
                 𝐏 𝐋 𝐀 𝐘 𝐘 𝐘 💯 <span className="text-[#d6b36a]">Coin Seller</span>
               </div>
-              <div className="text-xs text-[#c5b89d] tracking-[0.18em] uppercase">
+              <div className="text-[10px] sm:text-xs text-[#c5b89d] tracking-[0.12em] sm:tracking-[0.18em] uppercase leading-4">
                 StarMaker recharge coins top ups
               </div>
             </div>
 
             <a
               href="#calculator"
-              className="relative rounded-2xl px-5 py-2.5 text-sm font-semibold bg-[#d6b36a] text-black shadow-[0_6px_16px_rgba(214,179,106,0.12)] hover:scale-[1.02] transition-transform overflow-hidden"
+              className="relative rounded-2xl px-3 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold bg-[#d6b36a] text-black shadow-[0_6px_16px_rgba(214,179,106,0.12)] hover:scale-[1.02] transition-transform overflow-hidden shrink-0"
             >
               Bonus Calculator
               <div className="pointer-events-none absolute -left-[45%] top-0 h-full w-[35%] rotate-12 bg-gradient-to-r from-transparent via-white/28 to-transparent animate-[luxSweep_4.5s_linear_infinite]" />
@@ -522,8 +469,8 @@ export default function PlayyyCoinSellerWebsite() {
           </div>
         </header>
 
-        <section className="max-w-7xl mx-auto px-6 pt-8">
-          <div className="grid md:grid-cols-4 gap-4 mb-6">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 sm:pt-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-4 mb-4 sm:mb-6">
             {[
               "Trusted by Many StarMaker Users",
               "BIR Registered Business",
@@ -532,7 +479,7 @@ export default function PlayyyCoinSellerWebsite() {
             ].map((item, index) => (
               <div
                 key={item}
-                className="rounded-2xl border border-[#d6b36a]/14 bg-[linear-gradient(180deg,rgba(31,24,17,0.98),rgba(18,15,12,0.94))] p-4 text-center text-sm shadow-[0_8px_18px_rgba(0,0,0,0.16)]"
+                className="rounded-2xl border border-[#d6b36a]/14 bg-[linear-gradient(180deg,rgba(31,24,17,0.98),rgba(18,15,12,0.94))] p-3 sm:p-4 text-center text-[11px] sm:text-sm leading-4 sm:leading-5 shadow-[0_8px_18px_rgba(0,0,0,0.16)]"
                 style={{
                   animation: "heroReveal .45s ease-out both",
                   animationDelay: `${index * 0.05}s`,
@@ -543,29 +490,29 @@ export default function PlayyyCoinSellerWebsite() {
             ))}
           </div>
 
-          <div className="grid lg:grid-cols-[1.15fr_0.85fr] gap-6 mb-8">
-            <div className="rounded-[32px] border border-[#d6b36a]/14 bg-[radial-gradient(circle_at_top_right,rgba(255,229,156,0.08),transparent_24%),linear-gradient(to_bottom_right,#1b160f,#120f0b,#0f0c09)] p-7 shadow-[0_14px_34px_rgba(0,0,0,0.18)]">
-              <div className="inline-flex items-center gap-2 rounded-full border border-[#d6b36a]/20 px-4 py-2 text-xs uppercase tracking-[0.2em] text-[#e5cf97] bg-[#1c1710]/80 animate-[badgeFloat_4s_ease-in-out_infinite]">
+          <div className="grid lg:grid-cols-[1.15fr_0.85fr] gap-4 sm:gap-6 mb-6 sm:mb-8">
+            <div className="rounded-[28px] sm:rounded-[32px] border border-[#d6b36a]/14 bg-[radial-gradient(circle_at_top_right,rgba(255,229,156,0.08),transparent_24%),linear-gradient(to_bottom_right,#1b160f,#120f0b,#0f0c09)] p-5 sm:p-7 shadow-[0_14px_34px_rgba(0,0,0,0.18)]">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#d6b36a]/20 px-3 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs uppercase tracking-[0.16em] sm:tracking-[0.2em] text-[#e5cf97] bg-[#1c1710]/80 animate-[badgeFloat_4s_ease-in-out_infinite]">
                 <Sparkles size={14} /> Trusted and premium
               </div>
 
-              <h1 className="mt-5 text-4xl md:text-6xl font-black leading-tight animate-[heroReveal_.6s_ease-out]">
+              <h1 className="mt-4 sm:mt-5 text-3xl sm:text-4xl md:text-6xl font-black leading-[1.08] sm:leading-tight animate-[heroReveal_.6s_ease-out]">
                 Better value
                 <span className="block bg-clip-text text-transparent bg-[linear-gradient(90deg,#fff1be,#d6b36a,#fff5d7)]">
                   for Direct Top Up Orders
                 </span>
               </h1>
 
-              <p className="mt-5 text-[#d7ccb9] leading-8 max-w-2xl">
+              <p className="mt-3 sm:mt-5 text-sm sm:text-base text-[#d7ccb9] leading-6 sm:leading-8 max-w-2xl">
                 Clean pricing, better coin value, and a smoother order flow for buyers who want a more trusted recharge experience.
               </p>
 
-              <div className="mt-7 flex flex-wrap gap-3">
+              <div className="mt-5 sm:mt-7 flex flex-wrap gap-2.5 sm:gap-3">
                 <a
                   href={`https://wa.me/639955248326?text=${encodeURIComponent(generateMessage())}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="group relative inline-flex items-center gap-2 rounded-2xl px-5 py-3 bg-[#d6b36a] text-black font-semibold shadow-[0_6px_16px_rgba(214,179,106,0.12)] hover:scale-[1.02] transition-transform overflow-hidden"
+                  className="group relative inline-flex items-center gap-2 rounded-2xl px-4 sm:px-5 py-2.5 sm:py-3 bg-[#d6b36a] text-black text-sm sm:text-base font-semibold shadow-[0_6px_16px_rgba(214,179,106,0.12)] hover:scale-[1.02] transition-transform overflow-hidden"
                 >
                   Order via WhatsApp
                   <ArrowRight size={16} />
@@ -574,13 +521,13 @@ export default function PlayyyCoinSellerWebsite() {
 
                 <a
                   href="#packages"
-                  className="inline-flex items-center gap-2 rounded-2xl px-5 py-3 border border-[#d6b36a]/16 bg-[#17130f] text-[#f2e7d0] font-semibold hover:border-[#d6b36a]/28 hover:bg-[#1c1712] transition-colors"
+                  className="inline-flex items-center gap-2 rounded-2xl px-4 sm:px-5 py-2.5 sm:py-3 border border-[#d6b36a]/16 bg-[#17130f] text-[#f2e7d0] text-sm sm:text-base font-semibold hover:border-[#d6b36a]/28 hover:bg-[#1c1712] transition-colors"
                 >
                   View Packages
                 </a>
               </div>
 
-              <div className="grid sm:grid-cols-4 gap-4 mt-7">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 mt-5 sm:mt-7">
                 {[
                   { value: "35%–36%", label: "Bonus value" },
                   { value: "100", label: "Minimum amount" },
@@ -589,9 +536,9 @@ export default function PlayyyCoinSellerWebsite() {
                 ].map((item) => (
                   <div
                     key={item.label}
-                    className="rounded-2xl border border-[#d6b36a]/10 bg-[linear-gradient(180deg,rgba(34,26,17,0.96),rgba(17,15,12,0.92))] p-4"
+                    className="rounded-2xl border border-[#d6b36a]/10 bg-[linear-gradient(180deg,rgba(34,26,17,0.96),rgba(17,15,12,0.92))] p-3 sm:p-4"
                   >
-                    <div className="text-2xl font-black text-[#f3e4b9]">{item.value}</div>
+                    <div className="text-lg sm:text-2xl font-black text-[#f3e4b9]">{item.value}</div>
                     <div className="text-xs uppercase tracking-[0.16em] text-[#a99d89] mt-1">
                       {item.label}
                     </div>
@@ -600,16 +547,16 @@ export default function PlayyyCoinSellerWebsite() {
               </div>
             </div>
 
-            <SimpleCard className="p-7" highlight>
+            <SimpleCard className="p-5 sm:p-7" highlight>
               <div className="inline-flex items-center gap-2 rounded-full border border-[#d6b36a]/20 px-4 py-2 text-xs uppercase tracking-[0.2em] text-[#e5cf97] bg-[#1c1710]/80">
                 <ShieldCheck size={14} /> Important note
               </div>
 
-              <h2 className="text-2xl md:text-3xl font-black mt-5">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-black mt-4 sm:mt-5">
                 Please wait for my reply first
               </h2>
 
-              <div className="mt-5 rounded-2xl border border-[#d6b36a]/12 bg-[#120f0b] p-5 text-[#ddd3c5] leading-8">
+              <div className="mt-4 sm:mt-5 rounded-2xl border border-[#d6b36a]/12 bg-[#120f0b] p-4 sm:p-5 text-sm sm:text-base text-[#ddd3c5] leading-6 sm:leading-8">
                 Do not send any payment until you get a reply from me first. This helps avoid delays, duplicate payments, or processing issues during high demand periods. Maximum allowed amount is ₱50,000 per transaction.
               </div>
 
@@ -617,7 +564,7 @@ export default function PlayyyCoinSellerWebsite() {
                 For smoother processing, send your StarMaker ID and preferred amount first, then wait for confirmation before paying.
               </div>
 
-              <div className="grid grid-cols-2 gap-4 mt-6">
+              <div className="grid grid-cols-2 gap-2.5 sm:gap-4 mt-4 sm:mt-6">
                 <div className="rounded-2xl border border-[#d6b36a]/10 bg-[#120f0b] p-4">
                   <div className="text-xs uppercase tracking-[0.16em] text-[#d6b36a]">Safe flow</div>
                   <div className="mt-2 text-sm text-[#dbd1c4]">Message first before payment</div>
@@ -635,7 +582,7 @@ export default function PlayyyCoinSellerWebsite() {
           </div>
         </section>
 
-        <section id="calculator" className="max-w-7xl mx-auto px-6 py-4">
+        <section id="calculator" className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
           <div className="mb-6 grid md:grid-cols-3 gap-4">
             {[
               {
@@ -832,7 +779,7 @@ export default function PlayyyCoinSellerWebsite() {
             <h3 className="text-3xl md:text-5xl font-black mt-2">
               See the{" "}
               <span className="bg-gradient-to-r from-white via-yellow-100 to-[#f6d365] bg-clip-text text-transparent">
-                Smarter DEAL
+                smarter deal
               </span>
             </h3>
             <p className="mt-3 text-[#c9bfae] max-w-2xl mx-auto">
@@ -876,7 +823,7 @@ export default function PlayyyCoinSellerWebsite() {
             <h3 className="text-3xl md:text-5xl font-black mt-6">
               Verified
               <span className="block bg-gradient-to-r from-white via-yellow-100 to-[#f6d365] bg-clip-text text-transparent">
-                Business Registration
+                business registration
               </span>
             </h3>
             <p className="mt-3 text-[#c9bfae] max-w-3xl mx-auto">
@@ -1080,7 +1027,7 @@ export default function PlayyyCoinSellerWebsite() {
 
         <section className="max-w-7xl mx-auto px-6 pb-12">
           <div className="rounded-[32px] border border-[#d6b36a]/14 bg-[radial-gradient(circle_at_top,rgba(255,236,180,0.06),transparent_24%),linear-gradient(to_bottom,#17130f,#0f0d09)] p-8 text-center shadow-[0_14px_30px_rgba(0,0,0,0.16)]">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#d6b36a]/20 px-4 py-2 text-xs uppercase tracking-[0.2em] text-[#e5cf97] bg-[#1c1710]/80 animate-[badgeFloat_4s_ease-in-out_infinite]">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#d6b36a]/20 px-3 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs uppercase tracking-[0.16em] sm:tracking-[0.2em] text-[#e5cf97] bg-[#1c1710]/80 animate-[badgeFloat_4s_ease-in-out_infinite]">
               <Crown size={14} /> premium seller
             </div>
 
