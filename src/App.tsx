@@ -730,49 +730,49 @@ export default function PlayyyCoinSellerWebsite() {
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-5">
+          <div className="grid grid-cols-2 xl:grid-cols-3 gap-2.5 sm:gap-5">
             {packages.map((item) => {
               const bonusRate = getBonusRate(item.php);
               const yourCoins = Math.round(item.php * (1 + bonusRate));
 
               return (
-                <SimpleCard key={item.php} className="p-4 sm:p-6 h-full" highlight={item.php === 1000}>
-                  <div className="flex items-center justify-between gap-3 mb-2">
-                    <div className="text-xs uppercase tracking-[0.14em] text-[#a99d89]">
-                      In app
-                    </div>
-                    <div className="text-xs uppercase tracking-[0.14em] text-[#d6b36a]">
-                      Your deal
-                    </div>
-                  </div>
-
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <div className="text-sm text-[#a99d89]">{formatPHP(item.appPhp)}</div>
-                      <div className="text-lg font-semibold text-[#cfc6b8]">
-                        {formatCoins(item.appCoins)} coins
+                <SimpleCard key={item.php} className="p-3 sm:p-6 h-full" highlight={item.php === 1000}>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="rounded-2xl border border-white/5 bg-black/14 p-2.5 sm:p-4">
+                      <div className="text-[9px] sm:text-xs uppercase tracking-[0.12em] text-[#a99d89]">
+                        In app
+                      </div>
+                      <div className="mt-1 text-[11px] sm:text-sm text-[#a99d89]">{formatPHP(item.appPhp)}</div>
+                      <div className="text-sm sm:text-lg font-semibold leading-tight text-[#cfc6b8]">
+                        {formatCoins(item.appCoins)}
+                        <span className="block text-[9px] sm:text-xs uppercase tracking-[0.12em] text-[#7f7668]">coins</span>
                       </div>
                     </div>
 
-                    <div className="text-right">
-                      <div className="text-2xl sm:text-3xl font-black">{formatPHP(item.php)}</div>
-                      <div className="text-lg sm:text-xl text-[#e6d2a0] font-bold">
-                        {formatCoins(yourCoins)} coins
+                    <div className="rounded-2xl border border-[#d6b36a]/16 bg-[#1a140d] p-2.5 sm:p-4 text-right">
+                      <div className="text-[9px] sm:text-xs uppercase tracking-[0.12em] text-[#d6b36a]">
+                        Your deal
                       </div>
-                      <div className="mt-1 text-xs uppercase tracking-[0.14em] text-[#d6b36a]">
-                        {formatPercent(bonusRate)} bonus
+                      <div className="mt-1 text-lg sm:text-3xl font-black leading-tight">{formatPHP(item.php)}</div>
+                      <div className="text-sm sm:text-xl text-[#e6d2a0] font-bold leading-tight">
+                        {formatCoins(yourCoins)}
+                        <span className="block text-[9px] sm:text-xs uppercase tracking-[0.12em] text-[#d6b36a]">coins</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="mt-4 flex items-center justify-between gap-3">
-                    <div className="text-[11px] sm:text-xs leading-4 text-[#b9ae9a]">{item.note}</div>
+                  <div className="mt-2.5 flex items-center justify-between gap-2">
+                    <div className="text-[9px] sm:text-xs uppercase tracking-[0.12em] text-[#d6b36a]">
+                      {formatPercent(bonusRate)} bonus
+                    </div>
                     {(item.php === 1000 || item.php === 5000) && (
-                      <div className="inline-flex items-center gap-1 rounded-full border border-[#d6b36a]/18 bg-[#19140f] px-3 py-1 text-[10px] uppercase tracking-[0.16em] text-[#e8cf94]">
-                        <Flame size={12} /> hot
+                      <div className="inline-flex items-center gap-1 rounded-full border border-[#d6b36a]/18 bg-[#19140f] px-2 py-1 text-[8px] sm:text-[10px] uppercase tracking-[0.12em] text-[#e8cf94]">
+                        <Flame size={10} /> hot
                       </div>
                     )}
                   </div>
+
+                  <div className="mt-1.5 text-[9px] sm:text-xs leading-3.5 sm:leading-4 text-[#b9ae9a]">{item.note}</div>
                 </SimpleCard>
               );
             })}
