@@ -630,11 +630,11 @@ export default function PlayyyCoinSellerWebsite() {
                   𝐏 𝐋 𝐀 𝐘 𝐘 𝐘 💯
                 </div>
                 <div className="mt-1 text-[15px] sm:text-lg md:text-xl font-black tracking-[0.18em] sm:tracking-[0.24em] text-[#d6b36a] whitespace-nowrap">
-                  COIN SELLER
+                     COIN SELLER
                 </div>
               </div>
               <div className="text-[10px] sm:text-xs text-[#c5b89d] tracking-[0.12em] sm:tracking-[0.18em] uppercase leading-4">
-                StarMaker recharge coins top ups
+                StarMaker recharge coins top up
               </div>
             </div>
 
