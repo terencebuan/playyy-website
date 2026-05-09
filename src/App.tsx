@@ -14,6 +14,15 @@ import {
   CheckCircle2,
   BadgeDollarSign,
 } from "lucide-react";
+import { db } from "./firebase";
+import {
+  collection,
+  addDoc,
+  onSnapshot,
+  query,
+  orderBy,
+  serverTimestamp,
+} from "firebase/firestore";
 
 type ReviewItem = {
   name: string;
@@ -321,7 +330,7 @@ export default function PlayyyCoinSellerWebsite() {
   ];
 
   const [amount, setAmount] = useState("100");
-  const [reviews, setReviews] = useState(initialReviews);
+  const [reviews, setReviews] = useState<ReviewItem[]>(initialReviews);
   const [buyerName, setBuyerName] = useState("");
   const [buyerComment, setBuyerComment] = useState("");
   const [copied, setCopied] = useState(false);
@@ -333,7 +342,7 @@ export default function PlayyyCoinSellerWebsite() {
   };
 
   const calculator = useMemo(() => {
-    const cleanAmount = Number(amount);
+    const cleanAmount = Number.parseInt(amount, 10) || 0;
     const safeAmount = Math.min(50000, Math.max(100, cleanAmount || 100));
     const bonusRate = getBonusRate(safeAmount);
     const baseCoins = safeAmount;
@@ -354,6 +363,39 @@ export default function PlayyyCoinSellerWebsite() {
     const timer = setTimeout(() => setCopied(false), 1800);
     return () => clearTimeout(timer);
   }, [copied]);
+
+  useEffect(() => {
+    const commentsQuery = query(
+      collection(db, "buyerFeedback"),
+      orderBy("createdAt", "desc")
+    );
+
+    const unsubscribe = onSnapshot(
+      commentsQuery,
+      (snapshot) => {
+        const liveReviews: ReviewItem[] = snapshot.docs.map((doc) => {
+          const data = doc.data();
+
+          return {
+            name: typeof data.name === "string" && data.name.trim() ? data.name : "Buyer",
+            tag: typeof data.tag === "string" && data.tag.trim() ? data.tag : "REPEAT BUYER",
+            message:
+              typeof data.message === "string" && data.message.trim()
+                ? data.message
+                : "Smooth transaction.",
+          };
+        });
+
+        setReviews([...liveReviews, ...initialReviews]);
+      },
+      (error) => {
+        console.error("Unable to load live feedback:", error);
+        setReviews(initialReviews);
+      }
+    );
+
+    return () => unsubscribe();
+  }, []);
 
   const formatPHP = (value: number) =>
     new Intl.NumberFormat("en-PH", {
@@ -386,7 +428,7 @@ export default function PlayyyCoinSellerWebsite() {
     }
   };
 
-  const submitReview = () => {
+  const submitReview = async () => {
     const name = buyerName.trim();
     const message = buyerComment.trim();
 
@@ -395,9 +437,20 @@ export default function PlayyyCoinSellerWebsite() {
       return;
     }
 
-    setReviews((prev) => [{ name, tag: getCommentTag(message), message }, ...prev]);
-    setBuyerName("");
-    setBuyerComment("");
+    try {
+      await addDoc(collection(db, "buyerFeedback"), {
+        name,
+        tag: getCommentTag(message),
+        message,
+        createdAt: serverTimestamp(),
+      });
+
+      setBuyerName("");
+      setBuyerComment("");
+    } catch (error) {
+      console.error("Unable to post feedback:", error);
+      alert("Unable to post feedback. Please try again.");
+    }
   };
 
   return (
@@ -639,20 +692,16 @@ export default function PlayyyCoinSellerWebsite() {
                   inputMode="numeric"
                   pattern="[0-9]*"
                   value={amount}
-                  onFocus={(e) => e.target.select()}
+                  onFocus={(e) => e.currentTarget.select()}
                   onBlur={() => {
-                    if (amount.trim() === "") {
-                      setAmount("300");
+                    if (!amount) {
+                      setAmount("100");
                     }
                   }}
                   onChange={(e) => {
-                    let value = e.target.value.replace(/\D/g, "");
-
-                    if (value.length > 1) {
-                      value = value.replace(/^0+/, "");
-                    }
-
-                    setAmount(value);
+                    const onlyNumbers = e.target.value.replace(/\D/g, "");
+                    const cleanedValue = onlyNumbers.replace(/^0+(?=\d)/, "");
+                    setAmount(cleanedValue);
                   }}
                   className="mt-5 w-full rounded-2xl border border-[#d6b36a]/15 px-4 py-4 text-2xl font-bold bg-[#1a1712] outline-none focus:border-[#d6b36a]/35"
                 />
@@ -845,7 +894,7 @@ export default function PlayyyCoinSellerWebsite() {
             <h3 className="text-3xl md:text-5xl font-black mt-6">
               Verified
               <span className="block bg-gradient-to-r from-white via-yellow-100 to-[#f6d365] bg-clip-text text-transparent">
-                Business Registration
+                business registration
               </span>
             </h3>
             <p className="mt-3 text-[#c9bfae] max-w-3xl mx-auto">
@@ -897,32 +946,33 @@ export default function PlayyyCoinSellerWebsite() {
             <div className="text-sm text-[#b9ae9a]">What buyers are saying</div>
           </div>
 
-          <div className="overflow-hidden rounded-[28px] border border-[#d6b36a]/12 bg-[linear-gradient(180deg,rgba(24,19,15,0.98),rgba(15,12,9,0.96))] p-5 shadow-[0_12px_26px_rgba(0,0,0,0.16)]">
-            <div
-              className="flex gap-4 w-max"
-              style={{ animation: "reviewScroll 42s linear infinite" }}
-            >
-              {[...reviews, ...reviews].map((review, index) => (
+          <div className="rounded-[28px] border border-[#d6b36a]/12 bg-[linear-gradient(180deg,rgba(24,19,15,0.98),rgba(15,12,9,0.96))] p-4 sm:p-5 shadow-[0_12px_26px_rgba(0,0,0,0.16)]">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              {reviews.slice(0, 8).map((review, index) => (
                 <div
-                  key={`${review.name}-${index}`}
-                  className="w-[300px] shrink-0 rounded-2xl border border-[#d6b36a]/10 bg-[#14110d] p-5"
+                  key={`${review.name}-${review.message}-${index}`}
+                  className="rounded-2xl border border-[#d6b36a]/10 bg-[#14110d] p-3 sm:p-4 min-h-[150px]"
                 >
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <div className="font-bold text-[#f6edd8]">{review.name}</div>
-                      <div className="text-xs uppercase tracking-[0.14em] text-[#cba95c] mt-1">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="font-bold text-[#f6edd8] text-sm sm:text-base truncate">
+                        {review.name}
+                      </div>
+                      <div className="text-[9px] sm:text-[10px] uppercase tracking-[0.12em] text-[#cba95c] mt-1">
                         {review.tag}
                       </div>
                     </div>
 
-                    <div className="flex text-[#f0cf77]">
+                    <div className="hidden sm:flex text-[#f0cf77] shrink-0">
                       {Array.from({ length: 5 }).map((_, i) => (
-                        <Star key={i} size={14} fill="currentColor" />
+                        <Star key={i} size={12} fill="currentColor" />
                       ))}
                     </div>
                   </div>
 
-                  <p className="mt-4 text-sm leading-7 text-[#d8cebf]">{review.message}</p>
+                  <p className="mt-3 text-[12px] sm:text-sm leading-5 sm:leading-6 text-[#d8cebf] line-clamp-4">
+                    {review.message}
+                  </p>
                 </div>
               ))}
             </div>
