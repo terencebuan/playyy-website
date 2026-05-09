@@ -581,20 +581,19 @@ export default function PlayyyCoinSellerWebsite() {
 
         @keyframes luxSweep {
           0% { transform: translateX(-100%) rotate(12deg); opacity: 0 }
-          40% { opacity: .28 }
-          70% { opacity: .38 }
+          45% { opacity: .22 }
           100% { transform: translateX(320%) rotate(12deg); opacity: 0 }
         }
 
         @keyframes glowPulse {
-          0% { opacity:.10; transform: scale(1) }
-          50% { opacity:.18; transform: scale(1.03) }
-          100% { opacity:.10; transform: scale(1) }
+          0% { opacity:.09; transform: translate3d(0,0,0) scale(1) }
+          50% { opacity:.15; transform: translate3d(0,-6px,0) scale(1.015) }
+          100% { opacity:.09; transform: translate3d(0,0,0) scale(1) }
         }
 
         @keyframes badgeFloat {
           0% { transform: translateY(0px) }
-          50% { transform: translateY(-3px) }
+          50% { transform: translateY(-2px) }
           100% { transform: translateY(0px) }
         }
 
@@ -604,28 +603,19 @@ export default function PlayyyCoinSellerWebsite() {
         }
 
         @keyframes reviewScroll {
-          0% { transform: translateY(0) }
-          100% { transform: translateY(-50%) }
+          0% { transform: translate3d(0,0,0) }
+          100% { transform: translate3d(0,-50%,0) }
         }
 
-        @keyframes goldOrbit {
-          0% { transform: translate3d(-12px, 0, 0) scale(1); opacity: .16 }
-          50% { transform: translate3d(18px, -18px, 0) scale(1.08); opacity: .30 }
-          100% { transform: translate3d(-12px, 0, 0) scale(1); opacity: .16 }
-        }
-
-        @keyframes softBlink {
-          0%, 100% { opacity: .22; transform: scale(1) }
-          50% { opacity: .55; transform: scale(1.08) }
+        @media (prefers-reduced-motion: reduce) {
+          * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
         }
       `}</style>
 
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,224,137,0.08),transparent_22%),linear-gradient(to_bottom,#0a0907,#110f0c,#17130f)]" />
-      <div className="absolute inset-0 opacity-15 bg-[linear-gradient(135deg,transparent_0%,rgba(255,255,255,0.015)_24%,transparent_42%,rgba(255,215,120,0.03)_52%,transparent_72%,rgba(255,255,255,0.015)_84%,transparent_100%)] bg-[length:220%_220%] animate-[diamondFlow_20s_linear_infinite]" />
-      <div className="absolute left-1/2 top-0 h-[220px] w-[220px] -translate-x-1/2 rounded-full bg-yellow-300/6 blur-[55px] animate-[glowPulse_12s_ease-in-out_infinite]" />
-      <div className="absolute -left-20 top-[420px] h-[280px] w-[280px] rounded-full bg-[#d6b36a]/10 blur-[80px] animate-[goldOrbit_15s_ease-in-out_infinite]" />
-      <div className="absolute -right-24 top-[760px] h-[340px] w-[340px] rounded-full bg-yellow-200/8 blur-[90px] animate-[goldOrbit_18s_ease-in-out_infinite]" />
-      <div className="pointer-events-none absolute inset-0 opacity-25 [background-image:radial-gradient(circle_at_18%_22%,rgba(255,238,180,.22)_0_1px,transparent_1px),radial-gradient(circle_at_82%_34%,rgba(214,179,106,.26)_0_1px,transparent_1px),radial-gradient(circle_at_55%_72%,rgba(255,255,255,.18)_0_1px,transparent_1px)] [background-size:120px_120px,160px_160px,210px_210px] animate-[softBlink_5s_ease-in-out_infinite]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,224,137,0.075),transparent_24%),linear-gradient(to_bottom,#0a0907,#110f0c,#17130f)]" />
+      <div className="absolute inset-0 opacity-10 bg-[linear-gradient(135deg,transparent_0%,rgba(255,255,255,0.014)_24%,transparent_42%,rgba(255,215,120,0.025)_52%,transparent_72%,rgba(255,255,255,0.014)_84%,transparent_100%)] bg-[length:180%_180%] animate-[diamondFlow_34s_linear_infinite]" />
+      <div className="absolute left-1/2 top-0 h-[180px] w-[180px] -translate-x-1/2 rounded-full bg-yellow-300/6 blur-[36px] animate-[glowPulse_16s_ease-in-out_infinite]" />
+      <div className="pointer-events-none absolute inset-0 opacity-18 [background-image:radial-gradient(circle_at_18%_22%,rgba(255,238,180,.20)_0_1px,transparent_1px),radial-gradient(circle_at_82%_34%,rgba(214,179,106,.22)_0_1px,transparent_1px)] [background-size:150px_150px,210px_210px]" />
 
       <div className="relative z-10">
         <div className="relative overflow-hidden text-center text-[8.5px] sm:text-[10px] md:text-xs py-1.5 sm:py-2 px-3 tracking-[0.12em] sm:tracking-[0.22em] uppercase bg-[linear-gradient(90deg,#f9ebb7,#d6b36a,#fff4c8,#c99534,#f9ebb7)] text-black shadow-[0_4px_14px_rgba(214,179,106,0.14)] leading-4">
@@ -653,7 +643,7 @@ export default function PlayyyCoinSellerWebsite() {
               className="relative rounded-2xl px-3 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold bg-[#d6b36a] text-black shadow-[0_6px_16px_rgba(214,179,106,0.12)] hover:scale-[1.02] transition-transform overflow-hidden shrink-0"
             >
               Bonus Calculator
-              <div className="pointer-events-none absolute -left-[45%] top-0 h-full w-[35%] rotate-12 bg-gradient-to-r from-transparent via-white/28 to-transparent animate-[luxSweep_4.5s_linear_infinite]" />
+              <div className="pointer-events-none absolute -left-[45%] top-0 h-full w-[35%] rotate-12 bg-gradient-to-r from-transparent via-white/28 to-transparent animate-[luxSweep_9s_linear_infinite]" />
             </a>
           </div>
         </header>
@@ -681,7 +671,7 @@ export default function PlayyyCoinSellerWebsite() {
 
           <div className="grid lg:grid-cols-[1.15fr_0.85fr] gap-4 sm:gap-6 mb-6 sm:mb-8">
             <div className="rounded-[28px] sm:rounded-[32px] border border-[#d6b36a]/14 bg-[radial-gradient(circle_at_top_right,rgba(255,229,156,0.08),transparent_24%),linear-gradient(to_bottom_right,#1b160f,#120f0b,#0f0c09)] p-5 sm:p-7 shadow-[0_14px_34px_rgba(0,0,0,0.18)]">
-              <div className="inline-flex items-center gap-2 rounded-full border border-[#d6b36a]/20 px-3 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs uppercase tracking-[0.16em] sm:tracking-[0.2em] text-[#e5cf97] bg-[#1c1710]/80 animate-[badgeFloat_4s_ease-in-out_infinite]">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#d6b36a]/20 px-3 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs uppercase tracking-[0.16em] sm:tracking-[0.2em] text-[#e5cf97] bg-[#1c1710]/80 animate-[badgeFloat_6s_ease-in-out_infinite]">
                 <Sparkles size={14} /> Trusted and premium
               </div>
 
@@ -903,7 +893,7 @@ export default function PlayyyCoinSellerWebsite() {
                     className="relative overflow-hidden rounded-2xl px-5 py-3 bg-[#d6b36a] text-black font-semibold hover:scale-[1.02] transition-transform"
                   >
                     Order via WhatsApp
-                    <div className="pointer-events-none absolute -left-[45%] top-0 h-full w-[35%] rotate-12 bg-gradient-to-r from-transparent via-white/28 to-transparent animate-[luxSweep_4.5s_linear_infinite]" />
+                    <div className="pointer-events-none absolute -left-[45%] top-0 h-full w-[35%] rotate-12 bg-gradient-to-r from-transparent via-white/28 to-transparent animate-[luxSweep_9s_linear_infinite]" />
                   </a>
 
                   {copied && (
@@ -1126,22 +1116,22 @@ export default function PlayyyCoinSellerWebsite() {
             <div className="text-sm text-[#b9ae9a]">What buyers are saying</div>
           </div>
 
-          <div className="relative overflow-hidden rounded-[30px] border border-[#d6b36a]/18 bg-[radial-gradient(circle_at_top,rgba(255,229,150,0.08),transparent_30%),linear-gradient(180deg,rgba(28,22,16,0.98),rgba(13,11,8,0.97))] p-4 sm:p-5 shadow-[0_18px_40px_rgba(0,0,0,0.28),0_0_34px_rgba(214,179,106,0.06)]">
+          <div className="relative overflow-hidden rounded-[30px] border border-[#d6b36a]/18 bg-[radial-gradient(circle_at_top,rgba(255,229,150,0.08),transparent_30%),linear-gradient(180deg,rgba(28,22,16,0.98),rgba(13,11,8,0.97))] p-4 sm:p-5 shadow-[0_12px_28px_rgba(0,0,0,0.22),0_0_18px_rgba(214,179,106,0.04)]">
             <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-16 bg-gradient-to-b from-[#15100b] to-transparent" />
             <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-16 bg-gradient-to-t from-[#0e0b08] to-transparent" />
-            <div className="pointer-events-none absolute -left-[45%] top-0 h-full w-[35%] rotate-12 bg-gradient-to-r from-transparent via-white/12 to-transparent animate-[luxSweep_5s_linear_infinite]" />
+            <div className="pointer-events-none absolute -left-[45%] top-0 h-full w-[35%] rotate-12 bg-gradient-to-r from-transparent via-white/12 to-transparent animate-[luxSweep_10s_linear_infinite]" />
 
             <div className="grid gap-4 md:grid-cols-2">
               {[0, 1].map((column) => (
                 <div
                   key={column}
-                  className="relative h-[430px] overflow-hidden rounded-[24px] border border-[#d6b36a]/10 bg-black/16"
+                  className="relative h-[390px] overflow-hidden rounded-[24px] border border-[#d6b36a]/10 bg-black/16"
                 >
                   <div
                     className={`space-y-4 px-3 py-4 ${
                       column === 0
-                        ? "animate-[reviewScroll_22s_linear_infinite]"
-                        : "animate-[reviewScroll_26s_linear_infinite]"
+                        ? "animate-[reviewScroll_28s_linear_infinite]"
+                        : "animate-[reviewScroll_32s_linear_infinite]"
                     } hover:[animation-play-state:paused]`}
                   >
                     {scrollingReviews
@@ -1149,7 +1139,7 @@ export default function PlayyyCoinSellerWebsite() {
                       .map((review, index) => (
                         <div
                           key={`${review.id || review.name}-${review.message}-${column}-${index}`}
-                          className="group relative overflow-hidden rounded-2xl border border-[#d6b36a]/12 bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(214,179,106,0.035))] p-4 min-h-[138px] shadow-[0_10px_24px_rgba(0,0,0,0.20)] transition-all duration-300 hover:border-[#f6d365]/30 hover:bg-white/[0.06]"
+                          className="group relative overflow-hidden rounded-2xl border border-[#d6b36a]/12 bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(214,179,106,0.035))] p-4 min-h-[138px] shadow-[0_8px_18px_rgba(0,0,0,0.16)] transition-all duration-300 hover:border-[#f6d365]/30 hover:bg-white/[0.06]"
                         >
                           <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-[radial-gradient(circle_at_top_right,rgba(255,231,160,.13),transparent_42%)]" />
 
@@ -1308,7 +1298,7 @@ export default function PlayyyCoinSellerWebsite() {
 
         <section className="max-w-7xl mx-auto px-6 pb-12">
           <div className="rounded-[32px] border border-[#d6b36a]/14 bg-[radial-gradient(circle_at_top,rgba(255,236,180,0.06),transparent_24%),linear-gradient(to_bottom,#17130f,#0f0d09)] p-8 text-center shadow-[0_14px_30px_rgba(0,0,0,0.16)]">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#d6b36a]/20 px-3 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs uppercase tracking-[0.16em] sm:tracking-[0.2em] text-[#e5cf97] bg-[#1c1710]/80 animate-[badgeFloat_4s_ease-in-out_infinite]">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#d6b36a]/20 px-3 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs uppercase tracking-[0.16em] sm:tracking-[0.2em] text-[#e5cf97] bg-[#1c1710]/80 animate-[badgeFloat_6s_ease-in-out_infinite]">
               <Crown size={14} /> premium seller
             </div>
 
