@@ -25,6 +25,7 @@ import {
 } from "firebase/firestore";
 
 type ReviewItem = {
+  id?: string;
   name: string;
   tag: string;
   message: string;
@@ -65,6 +66,59 @@ function getCommentTag(text: string) {
   }
 
   return "REPEAT BUYER";
+}
+
+const LOCAL_REVIEW_KEY = "playyyBuyerFeedback";
+
+function getLocalReviews(): ReviewItem[] {
+  if (typeof window === "undefined") return [];
+
+  try {
+    const saved = window.localStorage.getItem(LOCAL_REVIEW_KEY);
+    if (!saved) return [];
+
+    const parsed = JSON.parse(saved);
+    if (!Array.isArray(parsed)) return [];
+
+    return parsed
+      .filter((item) => item?.name && item?.message)
+      .map((item) => ({
+        id:
+          typeof item.id === "string"
+            ? item.id
+            : `local-${item.name}-${item.message}`,
+        name: String(item.name),
+        tag:
+          typeof item.tag === "string"
+            ? item.tag
+            : getCommentTag(String(item.message)),
+        message: String(item.message),
+      }));
+  } catch {
+    return [];
+  }
+}
+
+function saveLocalReview(review: ReviewItem) {
+  if (typeof window === "undefined") return;
+
+  const current = getLocalReviews();
+  const next = [review, ...current].slice(0, 30);
+  window.localStorage.setItem(LOCAL_REVIEW_KEY, JSON.stringify(next));
+}
+
+function mergeReviews(...groups: ReviewItem[][]) {
+  const seen = new Set<string>();
+  const merged: ReviewItem[] = [];
+
+  groups.flat().forEach((review) => {
+    const key = `${review.name.trim().toLowerCase()}-${review.message.trim().toLowerCase()}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    merged.push(review);
+  });
+
+  return merged;
 }
 
 function SimpleCard({
@@ -153,7 +207,9 @@ function ComparisonCard({
                     : "bg-white/60 shadow-[0_0_5px_rgba(255,255,255,0.22)]"
                 }`}
               />
-              <p className="text-sm leading-6 text-white/82 md:text-[15px]">{item}</p>
+              <p className="text-sm leading-6 text-white/82 md:text-[15px]">
+                {item}
+              </p>
             </div>
           </div>
         ))}
@@ -162,7 +218,8 @@ function ComparisonCard({
       {highlight && (
         <div className="mt-6 rounded-2xl border border-yellow-200/12 bg-[linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,215,120,0.04))] px-4 py-4">
           <p className="text-sm font-medium leading-6 text-yellow-50/90">
-            Better value, a more personal service, and a smoother buying experience trusted by repeat buyers.
+            Better value, a more personal service, and a smoother buying
+            experience trusted by repeat buyers.
           </p>
         </div>
       )}
@@ -170,13 +227,7 @@ function ComparisonCard({
   );
 }
 
-function RealPdfPreview({
-  href,
-  title,
-}: {
-  href: string;
-  title: string;
-}) {
+function RealPdfPreview({ href, title }: { href: string; title: string }) {
   return (
     <div className="rounded-[24px] border border-[#dbcaa1]/60 bg-[linear-gradient(180deg,#fffdf8,#f7f0e1)] p-3 shadow-[0_16px_28px_rgba(0,0,0,0.18)]">
       <div className="overflow-hidden rounded-[18px] border border-[#d8c7a0]/70 bg-white shadow-inner">
@@ -251,7 +302,11 @@ function DocumentVisualCard({
         <div>
           <RealPdfPreview
             href={href}
-            title={docType === "DTI" ? "DTI Registration PDF" : "BIR Registration PDF"}
+            title={
+              docType === "DTI"
+                ? "DTI Registration PDF"
+                : "BIR Registration PDF"
+            }
           />
         </div>
 
@@ -262,7 +317,10 @@ function DocumentVisualCard({
                 key={index}
                 className="flex items-start gap-3 rounded-2xl border border-[#d6b36a]/10 bg-[#14110d] px-4 py-3"
               >
-                <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-[#d6b36a]" />
+                <CheckCircle2
+                  size={18}
+                  className="mt-0.5 shrink-0 text-[#d6b36a]"
+                />
                 <p className="text-sm leading-7 text-[#e5dccf]">{item}</p>
               </div>
             ))}
@@ -327,10 +385,44 @@ export default function PlayyyCoinSellerWebsite() {
       tag: "Satisfied buyer",
       message: "Professional and premium looking service. Legit transaction.",
     },
+    {
+      name: "Rhea",
+      tag: "Smooth order",
+      message:
+        "Clear instruction before payment. Coins received without stress.",
+    },
+    {
+      name: "Mark",
+      tag: "Trusted",
+      message: "Legit seller and very responsive. I will order again soon.",
+    },
+    {
+      name: "Joy",
+      tag: "Fast",
+      message: "Mabilis kausap and premium ang service. Thank you po.",
+    },
+    {
+      name: "Vince",
+      tag: "Value",
+      message: "Mas sulit compared sa usual in app top up. Smooth transaction.",
+    },
+    {
+      name: "Lyn",
+      tag: "Repeat buyer",
+      message: "Second time ordering. Same smooth and trusted experience.",
+    },
+    {
+      name: "Paulo",
+      tag: "VIP friendly",
+      message:
+        "Good for bigger recharge. Clear confirmation muna bago payment.",
+    },
   ];
 
   const [amount, setAmount] = useState("100");
-  const [reviews, setReviews] = useState<ReviewItem[]>(initialReviews);
+  const [reviews, setReviews] = useState<ReviewItem[]>(() =>
+    mergeReviews(getLocalReviews(), initialReviews),
+  );
   const [buyerName, setBuyerName] = useState("");
   const [buyerComment, setBuyerComment] = useState("");
   const [copied, setCopied] = useState(false);
@@ -358,6 +450,12 @@ export default function PlayyyCoinSellerWebsite() {
     };
   }, [amount]);
 
+  const scrollingReviews = useMemo(() => {
+    const base =
+      reviews.length >= 8 ? reviews : mergeReviews(reviews, initialReviews);
+    return [...base, ...base];
+  }, [reviews]);
+
   useEffect(() => {
     if (!copied) return;
     const timer = setTimeout(() => setCopied(false), 1800);
@@ -367,7 +465,7 @@ export default function PlayyyCoinSellerWebsite() {
   useEffect(() => {
     const commentsQuery = query(
       collection(db, "buyerFeedback"),
-      orderBy("createdAt", "desc")
+      orderBy("createdAt", "desc"),
     );
 
     const unsubscribe = onSnapshot(
@@ -377,8 +475,15 @@ export default function PlayyyCoinSellerWebsite() {
           const data = doc.data();
 
           return {
-            name: typeof data.name === "string" && data.name.trim() ? data.name : "Buyer",
-            tag: typeof data.tag === "string" && data.tag.trim() ? data.tag : "REPEAT BUYER",
+            id: doc.id,
+            name:
+              typeof data.name === "string" && data.name.trim()
+                ? data.name
+                : "Buyer",
+            tag:
+              typeof data.tag === "string" && data.tag.trim()
+                ? data.tag
+                : "REPEAT BUYER",
             message:
               typeof data.message === "string" && data.message.trim()
                 ? data.message
@@ -386,12 +491,14 @@ export default function PlayyyCoinSellerWebsite() {
           };
         });
 
-        setReviews([...liveReviews, ...initialReviews]);
+        setReviews(
+          mergeReviews(liveReviews, getLocalReviews(), initialReviews),
+        );
       },
       (error) => {
         console.error("Unable to load live feedback:", error);
-        setReviews(initialReviews);
-      }
+        setReviews(mergeReviews(getLocalReviews(), initialReviews));
+      },
     );
 
     return () => unsubscribe();
@@ -413,7 +520,7 @@ export default function PlayyyCoinSellerWebsite() {
 
   const generateMessage = () => {
     return `Hi, I want to order ${formatPHP(
-      calculator.safeAmount
+      calculator.safeAmount,
     )} with ${formatPercent(calculator.bonusRate)} bonus. Total coins: ${
       calculator.totalCoins
     }`;
@@ -437,10 +544,20 @@ export default function PlayyyCoinSellerWebsite() {
       return;
     }
 
+    const newReview: ReviewItem = {
+      id: `local-${Date.now()}`,
+      name,
+      tag: getCommentTag(message),
+      message,
+    };
+
+    saveLocalReview(newReview);
+    setReviews((current) => mergeReviews([newReview], current));
+
     try {
       await addDoc(collection(db, "buyerFeedback"), {
         name,
-        tag: getCommentTag(message),
+        tag: newReview.tag,
         message,
         createdAt: serverTimestamp(),
       });
@@ -487,14 +604,28 @@ export default function PlayyyCoinSellerWebsite() {
         }
 
         @keyframes reviewScroll {
-          0% { transform: translateX(0) }
-          100% { transform: translateX(-50%) }
+          0% { transform: translateY(0) }
+          100% { transform: translateY(-50%) }
+        }
+
+        @keyframes goldOrbit {
+          0% { transform: translate3d(-12px, 0, 0) scale(1); opacity: .16 }
+          50% { transform: translate3d(18px, -18px, 0) scale(1.08); opacity: .30 }
+          100% { transform: translate3d(-12px, 0, 0) scale(1); opacity: .16 }
+        }
+
+        @keyframes softBlink {
+          0%, 100% { opacity: .22; transform: scale(1) }
+          50% { opacity: .55; transform: scale(1.08) }
         }
       `}</style>
 
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,224,137,0.08),transparent_22%),linear-gradient(to_bottom,#0a0907,#110f0c,#17130f)]" />
       <div className="absolute inset-0 opacity-15 bg-[linear-gradient(135deg,transparent_0%,rgba(255,255,255,0.015)_24%,transparent_42%,rgba(255,215,120,0.03)_52%,transparent_72%,rgba(255,255,255,0.015)_84%,transparent_100%)] bg-[length:220%_220%] animate-[diamondFlow_20s_linear_infinite]" />
       <div className="absolute left-1/2 top-0 h-[220px] w-[220px] -translate-x-1/2 rounded-full bg-yellow-300/6 blur-[55px] animate-[glowPulse_12s_ease-in-out_infinite]" />
+      <div className="absolute -left-20 top-[420px] h-[280px] w-[280px] rounded-full bg-[#d6b36a]/10 blur-[80px] animate-[goldOrbit_15s_ease-in-out_infinite]" />
+      <div className="absolute -right-24 top-[760px] h-[340px] w-[340px] rounded-full bg-yellow-200/8 blur-[90px] animate-[goldOrbit_18s_ease-in-out_infinite]" />
+      <div className="pointer-events-none absolute inset-0 opacity-25 [background-image:radial-gradient(circle_at_18%_22%,rgba(255,238,180,.22)_0_1px,transparent_1px),radial-gradient(circle_at_82%_34%,rgba(214,179,106,.26)_0_1px,transparent_1px),radial-gradient(circle_at_55%_72%,rgba(255,255,255,.18)_0_1px,transparent_1px)] [background-size:120px_120px,160px_160px,210px_210px] animate-[softBlink_5s_ease-in-out_infinite]" />
 
       <div className="relative z-10">
         <div className="relative overflow-hidden text-center text-[8.5px] sm:text-[10px] md:text-xs py-1.5 sm:py-2 px-3 tracking-[0.12em] sm:tracking-[0.22em] uppercase bg-[linear-gradient(90deg,#f9ebb7,#d6b36a,#fff4c8,#c99534,#f9ebb7)] text-black shadow-[0_4px_14px_rgba(214,179,106,0.14)] leading-4">
@@ -562,7 +693,8 @@ export default function PlayyyCoinSellerWebsite() {
               </h1>
 
               <p className="mt-3 sm:mt-5 text-sm sm:text-base text-[#d7ccb9] leading-6 sm:leading-8 max-w-2xl">
-                Clean pricing, better coin value, and a smoother order flow for buyers who want a more trusted recharge experience.
+                Clean pricing, better coin value, and a smoother order flow for
+                buyers who want a more trusted recharge experience.
               </p>
 
               <div className="mt-5 sm:mt-7 flex flex-wrap gap-2.5 sm:gap-3">
@@ -596,7 +728,9 @@ export default function PlayyyCoinSellerWebsite() {
                     key={item.label}
                     className="rounded-2xl border border-[#d6b36a]/10 bg-[linear-gradient(180deg,rgba(34,26,17,0.96),rgba(17,15,12,0.92))] p-3 sm:p-4"
                   >
-                    <div className="text-lg sm:text-2xl font-black text-[#f3e4b9]">{item.value}</div>
+                    <div className="text-lg sm:text-2xl font-black text-[#f3e4b9]">
+                      {item.value}
+                    </div>
                     <div className="text-xs uppercase tracking-[0.16em] text-[#a99d89] mt-1">
                       {item.label}
                     </div>
@@ -615,17 +749,25 @@ export default function PlayyyCoinSellerWebsite() {
               </h2>
 
               <div className="mt-4 sm:mt-5 rounded-2xl border border-[#d6b36a]/12 bg-[#120f0b] p-4 sm:p-5 text-sm sm:text-base text-[#ddd3c5] leading-6 sm:leading-8">
-                Do not send any payment until you get a reply from me first. This helps avoid delays, duplicate payments, or processing issues during high demand periods. Maximum allowed amount is ₱50,000 per transaction.
+                Do not send any payment until you get a reply from me first.
+                This helps avoid delays, duplicate payments, or processing
+                issues during high demand periods. Maximum allowed amount is
+                ₱50,000 per transaction.
               </div>
 
               <div className="mt-4 text-sm text-[#b9ae9a] leading-7">
-                For smoother processing, send your StarMaker ID and preferred amount first, then wait for confirmation before paying.
+                For smoother processing, send your StarMaker ID and preferred
+                amount first, then wait for confirmation before paying.
               </div>
 
               <div className="grid grid-cols-2 gap-2.5 sm:gap-4 mt-4 sm:mt-6">
                 <div className="rounded-2xl border border-[#d6b36a]/10 bg-[#120f0b] p-4">
-                  <div className="text-xs uppercase tracking-[0.16em] text-[#d6b36a]">Safe flow</div>
-                  <div className="mt-2 text-sm text-[#dbd1c4]">Message first before payment</div>
+                  <div className="text-xs uppercase tracking-[0.16em] text-[#d6b36a]">
+                    Safe flow
+                  </div>
+                  <div className="mt-2 text-sm text-[#dbd1c4]">
+                    Message first before payment
+                  </div>
                 </div>
                 <div className="rounded-2xl border border-[#d6b36a]/10 bg-[#120f0b] p-4">
                   <div className="text-xs uppercase tracking-[0.16em] text-[#d6b36a]">
@@ -640,7 +782,10 @@ export default function PlayyyCoinSellerWebsite() {
           </div>
         </section>
 
-        <section id="calculator" className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+        <section
+          id="calculator"
+          className="max-w-7xl mx-auto px-4 sm:px-6 py-4"
+        >
           <div className="mb-6 grid md:grid-cols-3 gap-4">
             {[
               {
@@ -659,7 +804,10 @@ export default function PlayyyCoinSellerWebsite() {
                 text: "Priority is given to confirmed orders and repeat buyers during busy hours.",
               },
             ].map((item) => (
-              <SimpleCard key={item.title} className="p-5 text-sm text-[#ddd3c5]">
+              <SimpleCard
+                key={item.title}
+                className="p-5 text-sm text-[#ddd3c5]"
+              >
                 <div className="inline-flex items-center gap-2 text-[#d6b36a] text-xs uppercase tracking-[0.16em] mb-3">
                   {item.icon}
                   {item.title}
@@ -709,7 +857,9 @@ export default function PlayyyCoinSellerWebsite() {
 
               <div className="rounded-[26px] border border-[#d6b36a]/12 bg-[linear-gradient(to_bottom,#14120e,#100d09)] p-6">
                 <div className="flex items-center justify-between gap-3">
-                  <div className="text-4xl font-black">{formatPHP(calculator.safeAmount)}</div>
+                  <div className="text-4xl font-black">
+                    {formatPHP(calculator.safeAmount)}
+                  </div>
                   <div className="rounded-full border border-[#d6b36a]/18 bg-[#1a1712] px-3 py-1 text-xs uppercase tracking-[0.16em] text-[#d6b36a]">
                     {formatPercent(calculator.bonusRate)} bonus
                   </div>
@@ -718,7 +868,9 @@ export default function PlayyyCoinSellerWebsite() {
                 <div className="mt-6 space-y-3 text-[#e8dfd1]">
                   <div className="flex items-center justify-between rounded-2xl bg-[#11100c] p-4">
                     <span>Base coins</span>
-                    <span className="font-bold">{formatCoins(calculator.baseCoins)}</span>
+                    <span className="font-bold">
+                      {formatCoins(calculator.baseCoins)}
+                    </span>
                   </div>
 
                   <div className="flex items-center justify-between rounded-2xl bg-[#11100c] p-4">
@@ -754,21 +906,30 @@ export default function PlayyyCoinSellerWebsite() {
                     <div className="pointer-events-none absolute -left-[45%] top-0 h-full w-[35%] rotate-12 bg-gradient-to-r from-transparent via-white/28 to-transparent animate-[luxSweep_4.5s_linear_infinite]" />
                   </a>
 
-                  {copied && <span className="text-sm text-[#e6d2a0]">Copied successfully</span>}
+                  {copied && (
+                    <span className="text-sm text-[#e6d2a0]">
+                      Copied successfully
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
           </SimpleCard>
         </section>
 
-        <section id="packages" className="max-w-7xl mx-auto px-4 sm:px-6 py-7 sm:py-10">
+        <section
+          id="packages"
+          className="max-w-7xl mx-auto px-4 sm:px-6 py-7 sm:py-10"
+        >
           <div className="mb-4 sm:mb-6">
             <div className="inline-flex items-center gap-2 rounded-full border border-[#d6b36a]/18 bg-[#17130f] px-3 py-1.5 text-[10px] sm:text-sm uppercase tracking-[0.18em] sm:tracking-[0.2em] text-[#d6b36a]">
               <BadgeDollarSign size={13} /> Compare value
             </div>
             <h3 className="mt-2 text-[28px] sm:text-3xl md:text-4xl font-black leading-tight">
               In App vs
-              <span className="block bg-gradient-to-r from-white via-yellow-100 to-[#d6b36a] bg-clip-text text-transparent">Your Deal</span>
+              <span className="block bg-gradient-to-r from-white via-yellow-100 to-[#d6b36a] bg-clip-text text-transparent">
+                Your Deal
+              </span>
             </h3>
 
             <div className="mt-4 rounded-[22px] sm:rounded-[26px] border border-[#d6b36a]/18 bg-[linear-gradient(180deg,rgba(39,29,18,0.98),rgba(24,18,12,0.96))] p-4 sm:p-5 shadow-[0_12px_26px_rgba(214,179,106,0.05)]">
@@ -782,7 +943,8 @@ export default function PlayyyCoinSellerWebsite() {
                     Cash payment rates only.
                   </div>
                   <div className="mt-1.5 text-xs sm:text-base md:text-lg font-medium text-[#eadfcb] leading-5 sm:leading-7">
-                    Other arrangements may have separate terms. Please wait for confirmation before paying.
+                    Other arrangements may have separate terms. Please wait for
+                    confirmation before paying.
                   </div>
                 </div>
               </div>
@@ -799,16 +961,24 @@ export default function PlayyyCoinSellerWebsite() {
               const yourCoins = Math.round(item.php * (1 + bonusRate));
 
               return (
-                <SimpleCard key={item.php} className="p-3 sm:p-6 h-full" highlight={item.php === 1000}>
+                <SimpleCard
+                  key={item.php}
+                  className="p-3 sm:p-6 h-full"
+                  highlight={item.php === 1000}
+                >
                   <div className="grid grid-cols-2 gap-2">
                     <div className="rounded-2xl border border-white/5 bg-black/14 p-2.5 sm:p-4">
                       <div className="text-[9px] sm:text-xs uppercase tracking-[0.12em] text-[#a99d89]">
                         In app
                       </div>
-                      <div className="mt-1 text-[11px] sm:text-sm text-[#a99d89]">{formatPHP(item.appPhp)}</div>
+                      <div className="mt-1 text-[11px] sm:text-sm text-[#a99d89]">
+                        {formatPHP(item.appPhp)}
+                      </div>
                       <div className="text-sm sm:text-lg font-semibold leading-tight text-[#cfc6b8]">
                         {formatCoins(item.appCoins)}
-                        <span className="block text-[9px] sm:text-xs uppercase tracking-[0.12em] text-[#7f7668]">coins</span>
+                        <span className="block text-[9px] sm:text-xs uppercase tracking-[0.12em] text-[#7f7668]">
+                          coins
+                        </span>
                       </div>
                     </div>
 
@@ -816,10 +986,14 @@ export default function PlayyyCoinSellerWebsite() {
                       <div className="text-[9px] sm:text-xs uppercase tracking-[0.12em] text-[#d6b36a]">
                         Your deal
                       </div>
-                      <div className="mt-1 text-lg sm:text-3xl font-black leading-tight">{formatPHP(item.php)}</div>
+                      <div className="mt-1 text-lg sm:text-3xl font-black leading-tight">
+                        {formatPHP(item.php)}
+                      </div>
                       <div className="text-sm sm:text-xl text-[#e6d2a0] font-bold leading-tight">
                         {formatCoins(yourCoins)}
-                        <span className="block text-[9px] sm:text-xs uppercase tracking-[0.12em] text-[#d6b36a]">coins</span>
+                        <span className="block text-[9px] sm:text-xs uppercase tracking-[0.12em] text-[#d6b36a]">
+                          coins
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -835,7 +1009,9 @@ export default function PlayyyCoinSellerWebsite() {
                     )}
                   </div>
 
-                  <div className="mt-1.5 text-[9px] sm:text-xs leading-3.5 sm:leading-4 text-[#b9ae9a]">{item.note}</div>
+                  <div className="mt-1.5 text-[9px] sm:text-xs leading-3.5 sm:leading-4 text-[#b9ae9a]">
+                    {item.note}
+                  </div>
                 </SimpleCard>
               );
             })}
@@ -854,7 +1030,8 @@ export default function PlayyyCoinSellerWebsite() {
               </span>
             </h3>
             <p className="mt-3 text-sm sm:text-base leading-6 text-[#c9bfae] max-w-2xl mx-auto">
-              Quick side-by-side view so buyers can understand the value faster on mobile.
+              Quick side-by-side view so buyers can understand the value faster
+              on mobile.
             </p>
           </div>
 
@@ -898,7 +1075,8 @@ export default function PlayyyCoinSellerWebsite() {
               </span>
             </h3>
             <p className="mt-3 text-[#c9bfae] max-w-3xl mx-auto">
-              Buyers can immediately see that this business operates with official registration for better trust and transparency.
+              Buyers can immediately see that this business operates with
+              official registration for better trust and transparency.
             </p>
           </div>
 
@@ -941,38 +1119,63 @@ export default function PlayyyCoinSellerWebsite() {
               <div className="text-sm uppercase tracking-[0.2em] text-[#d6b36a]">
                 Buyer feedback
               </div>
-              <h3 className="text-3xl font-black mt-2">Recent buyer feedback</h3>
+              <h3 className="text-3xl font-black mt-2">
+                Recent buyer feedback
+              </h3>
             </div>
             <div className="text-sm text-[#b9ae9a]">What buyers are saying</div>
           </div>
 
-          <div className="rounded-[28px] border border-[#d6b36a]/12 bg-[linear-gradient(180deg,rgba(24,19,15,0.98),rgba(15,12,9,0.96))] p-4 sm:p-5 shadow-[0_12px_26px_rgba(0,0,0,0.16)]">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-              {reviews.slice(0, 8).map((review, index) => (
+          <div className="relative overflow-hidden rounded-[30px] border border-[#d6b36a]/18 bg-[radial-gradient(circle_at_top,rgba(255,229,150,0.08),transparent_30%),linear-gradient(180deg,rgba(28,22,16,0.98),rgba(13,11,8,0.97))] p-4 sm:p-5 shadow-[0_18px_40px_rgba(0,0,0,0.28),0_0_34px_rgba(214,179,106,0.06)]">
+            <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-16 bg-gradient-to-b from-[#15100b] to-transparent" />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-16 bg-gradient-to-t from-[#0e0b08] to-transparent" />
+            <div className="pointer-events-none absolute -left-[45%] top-0 h-full w-[35%] rotate-12 bg-gradient-to-r from-transparent via-white/12 to-transparent animate-[luxSweep_5s_linear_infinite]" />
+
+            <div className="grid gap-4 md:grid-cols-2">
+              {[0, 1].map((column) => (
                 <div
-                  key={`${review.name}-${review.message}-${index}`}
-                  className="rounded-2xl border border-[#d6b36a]/10 bg-[#14110d] p-3 sm:p-4 min-h-[150px]"
+                  key={column}
+                  className="relative h-[430px] overflow-hidden rounded-[24px] border border-[#d6b36a]/10 bg-black/16"
                 >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <div className="font-bold text-[#f6edd8] text-sm sm:text-base truncate">
-                        {review.name}
-                      </div>
-                      <div className="text-[9px] sm:text-[10px] uppercase tracking-[0.12em] text-[#cba95c] mt-1">
-                        {review.tag}
-                      </div>
-                    </div>
+                  <div
+                    className={`space-y-4 px-3 py-4 ${
+                      column === 0
+                        ? "animate-[reviewScroll_22s_linear_infinite]"
+                        : "animate-[reviewScroll_26s_linear_infinite]"
+                    } hover:[animation-play-state:paused]`}
+                  >
+                    {scrollingReviews
+                      .filter((_, index) => index % 2 === column)
+                      .map((review, index) => (
+                        <div
+                          key={`${review.id || review.name}-${review.message}-${column}-${index}`}
+                          className="group relative overflow-hidden rounded-2xl border border-[#d6b36a]/12 bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(214,179,106,0.035))] p-4 min-h-[138px] shadow-[0_10px_24px_rgba(0,0,0,0.20)] transition-all duration-300 hover:border-[#f6d365]/30 hover:bg-white/[0.06]"
+                        >
+                          <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-[radial-gradient(circle_at_top_right,rgba(255,231,160,.13),transparent_42%)]" />
 
-                    <div className="hidden sm:flex text-[#f0cf77] shrink-0">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <Star key={i} size={12} fill="currentColor" />
+                          <div className="relative z-10 flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <div className="font-bold text-[#fff4d8] text-sm sm:text-base truncate">
+                                {review.name}
+                              </div>
+                              <div className="mt-1 inline-flex rounded-full border border-[#d6b36a]/16 bg-[#d6b36a]/8 px-2 py-1 text-[9px] sm:text-[10px] uppercase tracking-[0.12em] text-[#f3d58a]">
+                                {review.tag}
+                              </div>
+                            </div>
+
+                            <div className="flex text-[#f0cf77] shrink-0">
+                              {Array.from({ length: 5 }).map((_, i) => (
+                                <Star key={i} size={12} fill="currentColor" />
+                              ))}
+                            </div>
+                          </div>
+
+                          <p className="relative z-10 mt-3 text-[12px] sm:text-sm leading-5 sm:leading-6 text-[#eadfcd]">
+                            {review.message}
+                          </p>
+                        </div>
                       ))}
-                    </div>
                   </div>
-
-                  <p className="mt-3 text-[12px] sm:text-sm leading-5 sm:leading-6 text-[#d8cebf] line-clamp-4">
-                    {review.message}
-                  </p>
                 </div>
               ))}
             </div>
@@ -983,9 +1186,12 @@ export default function PlayyyCoinSellerWebsite() {
               <div className="text-sm uppercase tracking-[0.2em] text-[#d6b36a]">
                 Leave feedback
               </div>
-              <h4 className="text-2xl font-black mt-2">Share your experience</h4>
+              <h4 className="text-2xl font-black mt-2">
+                Share your experience
+              </h4>
               <p className="mt-3 text-[#cfc6b8] leading-7">
-                Share your experience after your transaction to help other buyers.
+                Share your experience after your transaction to help other
+                buyers.
               </p>
 
               <div className="grid md:grid-cols-2 gap-4 mt-5">
@@ -1050,7 +1256,9 @@ export default function PlayyyCoinSellerWebsite() {
             <div className="text-sm uppercase tracking-[0.2em] text-[#d6b36a]">
               Contact and payment
             </div>
-            <h4 className="text-2xl font-black mt-2">Order and payment details</h4>
+            <h4 className="text-2xl font-black mt-2">
+              Order and payment details
+            </h4>
             <p className="mt-3 text-[#cfc6b8] leading-7">
               For faster processing, message first before sending any payment.
             </p>
@@ -1090,7 +1298,8 @@ export default function PlayyyCoinSellerWebsite() {
                   All posted rates are for cash payment only.
                 </p>
                 <p className="mt-2 text-sm text-[#c9bfae] leading-7">
-                  Please do not send payment until you get a reply and confirmation from me first.
+                  Please do not send payment until you get a reply and
+                  confirmation from me first.
                 </p>
               </div>
             </div>
@@ -1111,8 +1320,9 @@ export default function PlayyyCoinSellerWebsite() {
             </h4>
 
             <p className="mt-8 max-w-2xl mx-auto text-[#cfc6b8] leading-8">
-               
-              Send your StarMaker ID and preferred amount first. Wait for confirmation before paying to keep your transaction smooth and secure.
+              Send your StarMaker ID and preferred amount first. Wait for
+              confirmation before paying to keep your transaction smooth and
+              secure.
             </p>
 
             <div className="mt-6 flex justify-center">
