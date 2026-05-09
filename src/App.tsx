@@ -1016,7 +1016,7 @@ export default function PlayyyCoinSellerWebsite() {
             <h3 className="text-[28px] sm:text-3xl md:text-5xl font-black mt-2 leading-tight">
               See the{" "}
               <span className="bg-gradient-to-r from-white via-yellow-100 to-[#f6d365] bg-clip-text text-transparent">
-                smarter deal
+                Smarter Deal
               </span>
             </h3>
             <p className="mt-3 text-sm sm:text-base leading-6 text-[#c9bfae] max-w-2xl mx-auto">
@@ -1061,7 +1061,7 @@ export default function PlayyyCoinSellerWebsite() {
             <h3 className="text-3xl md:text-5xl font-black mt-6">
               Verified
               <span className="block bg-gradient-to-r from-white via-yellow-100 to-[#f6d365] bg-clip-text text-transparent">
-                business registration
+                Business Registration
               </span>
             </h3>
             <p className="mt-3 text-[#c9bfae] max-w-3xl mx-auto">
@@ -1305,7 +1305,7 @@ export default function PlayyyCoinSellerWebsite() {
             <h4 className="mt-5 text-3xl md:text-5xl font-black">
               Ready to order your next
               <span className="block bg-clip-text text-transparent bg-[linear-gradient(90deg,#fff1be,#d6b36a,#fff5d7)]">
-                premium top up
+                Premium Top Up
               </span>
             </h4>
 
