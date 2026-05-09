@@ -845,7 +845,7 @@ export default function PlayyyCoinSellerWebsite() {
             <h3 className="text-3xl md:text-5xl font-black mt-6">
               Verified
               <span className="block bg-gradient-to-r from-white via-yellow-100 to-[#f6d365] bg-clip-text text-transparent">
-                business registration
+                Business Registration
               </span>
             </h3>
             <p className="mt-3 text-[#c9bfae] max-w-3xl mx-auto">
